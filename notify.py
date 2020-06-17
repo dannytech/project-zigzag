@@ -21,6 +21,7 @@ with open("lastrun.log", "r") as f:
         lastrun = datetime.datetime.fromisoformat(lastrun)
     else:
         lastrun = datetime.datetime.fromtimestamp(0).replace(tzinfo=datetime.timezone.utc) # The beginning of time ;)
+print(lastrun.strftime("Script last run on %b %d %Y at %H:%M:%S %Z"))
 
 # Write the current time early to prevent a race condition whereby logs are missed if they arrive during this script's execution
 with open("lastrun.log", "w") as f:
@@ -29,9 +30,12 @@ with open("lastrun.log", "w") as f:
 
 # List all files in the directory
 logfiles = [f for f in os.listdir(args.logdir) if os.path.isfile(os.path.join(args.logdir, f))]
+print(f"Logs to process: {len(logfiles)}")
 
 # Finds any logs created after the last scan (we can safely assume the client is reporting in UTC as it was designed to do so)
 # However, a clock desync could result in missed logs
+processed, purged = 0, 0
+print("Beginning processing...")
 for f in logfiles:
     m = re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}(?:\.\d{6})[+-]\d{2}:\d{2})", f) # Extract the time from the filename
     
@@ -40,6 +44,7 @@ for f in logfiles:
 
         # If the log has not been processed in a previous run
         if logtime > lastrun:
+            processed += 1
             if args.slack is not None:
                 # Sends a webhook notification to Slack
                 with open(os.path.join(args.logdir, f)) as logfile:
@@ -67,4 +72,9 @@ for f in logfiles:
 
         # Throw away old logfiles (>2 days)
         if logtime < currentrun - datetime.timedelta(days=args.retention):
+            purged += 1
             os.remove(os.path.join(args.logdir, f))
+
+print("Processing complete")
+print(f"New logs: {processed}")
+print(f"Purged logs: {purged}")
