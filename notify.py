@@ -50,25 +50,29 @@ for f in logfiles:
                 with open(os.path.join(args.logdir, f), encoding="utf-16") as logfile:
                     logdata = json.load(logfile)
 
-                    # POST body for incoming webhook
-                    notification_message = {
-                        "attachments": [
-                            {
-                                "fallback": f"{logdata['MachineName']}: {logdata['Message']}",
-                                "color": "#D27CD8",
-                                "title": logdata["MachineName"],
-                                "text": logdata["Message"],
-                                "footer": "Default Notification Service",
-                                "ts": logdata["TimeGenerated"]
-                            }
-                        ]
-                    }
-                    webhook_data = json.dumps(notification_message).encode("utf-8")
+                    if type(logdata) == dict:
+                        logdata = [logdata]
 
-                    # The webhook URL is the only dynamic part of the script
-                    request = urllib.request.Request(args.slack, webhook_data)
-                    request.add_header("Content-Type", "application/json")
-                    response = urllib.request.urlopen(request)
+                    # POST body for incoming webhook
+                    for log in logdata:
+                        notification_message = {
+                            "attachments": [
+                                {
+                                    "fallback": f"{log['MachineName']}: {log['Message']}",
+                                    "color": "#D27CD8",
+                                    "title": log["MachineName"],
+                                    "text": log["Message"],
+                                    "footer": "Default Notification Service",
+                                    "ts": log["TimeCreated"]
+                                }
+                            ]
+                        }
+                        webhook_data = json.dumps(notification_message).encode("utf-8")
+
+                        # The webhook URL is the only dynamic part of the script
+                        request = urllib.request.Request(args.slack, webhook_data)
+                        request.add_header("Content-Type", "application/json")
+                        response = urllib.request.urlopen(request)
 
         # Throw away old logfiles (>2 days)
         if logtime < currentrun - datetime.timedelta(days=args.retention):
