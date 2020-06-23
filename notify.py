@@ -37,17 +37,17 @@ print(f"Logs to process: {len(logfiles)}")
 processed, purged = 0, 0
 print("Beginning processing...")
 for f in logfiles:
-    m = re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}(?:\.\d{6})[+-]\d{2}:\d{2})", f) # Extract the time from the filename
+    m = re.search(r"(\d{4}-\d{2}-\d{2} \d{2}\-\d{2}\-\d{2})", f) # Extract the time from the filename
     
     if m is not None:
-        logtime = datetime.datetime.fromisoformat(m.group(1)).replace(tzinfo=datetime.timezone.utc)
+        logtime = datetime.datetime.strptime(m.group(1), "%Y-%m-%d %H-%M-%S").replace(tzinfo=datetime.timezone.utc)
 
         # If the log has not been processed in a previous run
         if logtime > lastrun:
             processed += 1
             if args.slack is not None:
                 # Sends a webhook notification to Slack
-                with open(os.path.join(args.logdir, f)) as logfile:
+                with open(os.path.join(args.logdir, f), encoding="utf-16") as logfile:
                     logdata = json.load(logfile)
 
                     # POST body for incoming webhook
