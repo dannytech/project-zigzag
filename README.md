@@ -1,3 +1,3 @@
-# default-server
+# zigzag-backend
 
-Backend for the Default logging and notification service.
+Backend for the Project Zigzag logging and notification service.
