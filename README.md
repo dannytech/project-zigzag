@@ -1,3 +1,3 @@
-# zigzag-backend
+# project-zigzag
 
-Backend for the Project Zigzag logging and notification service.
+Project Zigzag logging and notification service.
