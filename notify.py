@@ -62,7 +62,7 @@ for f in logfiles:
                                     "color": "#D27CD8",
                                     "title": log["MachineName"],
                                     "text": log["Message"],
-                                    "footer": "Default Notification Service",
+                                    "footer": "Zigzag Notification Service",
                                     "ts": log["TimeCreated"]
                                 }
                             ]
